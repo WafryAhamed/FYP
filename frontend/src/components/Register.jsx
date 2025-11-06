@@ -23,8 +23,8 @@ const Register = () => {
     }
     try {
       await authApi.post('/auth/register', formData);
-      setSuccess('Registration successful! Check your email to activate.');
-      setTimeout(() => navigate('/login'), 3000);
+      setSuccess('Registration successful!');
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed.');
     } finally {
