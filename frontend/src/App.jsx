@@ -8,6 +8,8 @@ import Onboarding from './components/Onboarding.jsx';
 import Login from './components/Login.jsx';
 import Register from './components/Register.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import ForgotPassword from './components/ForgotPassword.jsx';
+import ResetPassword from './components/ResetPassword.jsx';
 import { authApi } from './api.js';
 
 function App() {
@@ -16,17 +18,15 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      checkAuth();
-    }
+    if (token) checkAuth();
   }, []);
 
   const checkAuth = async () => {
     try {
-      const response = await authApi.getProfile();
+      const response = await authApi.get('/user/profile');
       setUser(response.data);
       setIsAuthenticated(true);
-    } catch (error) {
+    } catch {
       localStorage.removeItem('token');
       setIsAuthenticated(false);
       setUser(null);
@@ -54,6 +54,9 @@ function App() {
           <Route path="/login" element={!isAuthenticated ? <Login onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/dashboard" replace />} />
           <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={isAuthenticated ? <Dashboard user={user} /> : <Navigate to="/login" replace />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          {/* Activation route is handled by backend GET /api/auth/activate */}
         </Routes>
       </div>
     </Router>
