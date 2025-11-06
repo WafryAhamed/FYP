@@ -62,10 +62,20 @@ router.post("/login", async (req, res) => {
       });
     }
     await pool.query("UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ?", [user.id]);
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.roll }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.roll },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
     return res.json({
       token,
-      user: { id: user.id, firstName: user.first_name, lastName: user.last_name, email: user.email, role: user.roll }
+      user: {
+        id: user.id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        role: user.roll
+      }
     });
   } catch (err) {
     console.error("Login Error:", err);
@@ -84,7 +94,7 @@ router.post("/forgot-password", async (req, res) => {
     if (rows.length > 0) {
       await pool.query("UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?", [resetToken, expiresAt, rows[0].id]);
     }
-    console.log(`[DEV] Reset link: http://localhost:5173/reset-password?token=${resetToken}`);
+    console.log(`[DEV] Password reset link: http://localhost:5173/reset-password?token=${resetToken}`);
     res.json({ message: "If an account exists, a reset link has been sent." });
   } catch (err) {
     console.error("Forgot Password Error:", err);
@@ -95,16 +105,22 @@ router.post("/forgot-password", async (req, res) => {
 // Reset Password
 router.post("/reset-password", async (req, res) => {
   const { token, newPassword, confirmPassword } = req.body;
-  if (!token || !newPassword || !confirmPassword) return res.status(400).json({ message: "All fields required" });
-  if (newPassword !== confirmPassword) return res.status(400).json({ message: "Passwords do not match" });
+  if (!token || !newPassword || !confirmPassword) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ message: "Passwords do not match" });
+  }
   try {
     const [rows] = await pool.query("SELECT id FROM users WHERE reset_token = ? AND reset_expires > NOW()", [token]);
-    if (rows.length === 0) return res.status(400).json({ message: "Invalid or expired reset token" });
+    if (rows.length === 0) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
     const hashed = await bcrypt.hash(newPassword, 10);
     await pool.query("UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?", [hashed, rows[0].id]);
     res.json({ message: "Password reset successfully. You can now log in." });
   } catch (err) {
-    console.error("Reset Error:", err);
+    console.error("Reset Password Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
