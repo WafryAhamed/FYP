@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../api.js';
+import './ResetPassword.css';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -16,22 +17,15 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
-    setLoading(true);
-
+    setError(''); setMessage(''); setLoading(true);
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
+      setError('Passwords do not match'); setLoading(false); return;
     }
-
     try {
       await authApi.post('/auth/reset-password', formData);
-      setMessage('Password reset successfully. Redirecting to login...');
+      setMessage('Password reset successfully. Redirecting...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Reset failed.');
@@ -41,12 +35,11 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full p-6 bg-white rounded shadow">
-        <h2 className="text-2xl font-bold text-center mb-6">Reset Password</h2>
-        {error && <div className="mb-4 p-2 bg-red-100 text-red-700">{error}</div>}
-        {message && <div className="mb-4 p-2 bg-green-100 text-green-700">{message}</div>}
-
+    <div className="reset-container">
+      <div className="reset-card">
+        <h2>Reset Password</h2>
+        {error && <div className="alert error">{error}</div>}
+        {message && <div className="alert success">{message}</div>}
         <form onSubmit={handleSubmit}>
           <input
             name="newPassword"
@@ -54,7 +47,6 @@ const ResetPassword = () => {
             value={formData.newPassword}
             onChange={handleChange}
             placeholder="New Password"
-            className="w-full px-3 py-2 border rounded mb-4"
             required
           />
           <input
@@ -63,14 +55,9 @@ const ResetPassword = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="Confirm New Password"
-            className="w-full px-3 py-2 border rounded mb-6"
             required
           />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded"
-          >
+          <button type="submit" disabled={loading}>
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>

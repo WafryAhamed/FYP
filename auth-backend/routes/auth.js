@@ -8,10 +8,6 @@ dotenv.config();
 
 const router = express.Router();
 
-const generateToken = () => {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-};
-
 // Register
 router.post("/register", async (req, res) => {
   try {
@@ -25,39 +21,15 @@ router.post("/register", async (req, res) => {
     const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
     if (existing.length > 0) return res.status(400).json({ message: "Email already registered" });
     const hashed = await bcrypt.hash(password, 10);
-    const [result] = await pool.query(
-      `INSERT INTO users (first_name, last_name, roll, email, password, password_hint, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [firstName, lastName, roll, email, hashed, passwordHint || null, 0]
+    await pool.query(
+      `INSERT INTO users (first_name, last_name, roll, email, password, password_hint) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [firstName, lastName, roll, email, hashed, passwordHint || null]
     );
-    const activationToken = generateToken();
-    await pool.query("UPDATE users SET activation_token = ? WHERE id = ?", [activationToken, result.insertId]);
-    console.log(`[DEV] Activation: http://localhost:5173/activate?token=${activationToken}`);
-    return res.status(201).json({ message: "Registration successful. Check email to activate." });
+    return res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     console.error("Registration Error:", err);
     return res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Activate Account
-router.get("/activate", async (req, res) => {
-  const { token } = req.query;
-  if (!token) return res.status(400).json({ message: "Activation token required" });
-  try {
-    const [rows] = await pool.query("SELECT id FROM users WHERE activation_token = ? AND status = 0", [token]);
-    if (rows.length === 0) return res.status(400).json({ message: "Invalid or expired token" });
-    await pool.query("UPDATE users SET status = 1, activation_token = NULL WHERE id = ?", [rows[0].id]);
-    res.send(`
-      <div style="font-family: Arial; text-align: center; padding: 40px;">
-        <h1 style="color: #0d6efd;">✅ Account Activated!</h1>
-        <p>Your account is now active.</p>
-        <a href="http://localhost:5173/login" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #0d6efd; color: white; text-decoration: none; border-radius: 8px;">Go to Login</a>
-      </div>
-    `);
-  } catch (err) {
-    console.error("Activation Error:", err);
-    res.status(500).send("Server Error");
   }
 });
 
@@ -70,15 +42,16 @@ router.post("/login", async (req, res) => {
     if (rows.length === 0) return res.status(400).json({ message: "Invalid credentials" });
     const user = rows[0];
     if (user.locked_until && new Date() < new Date(user.locked_until)) {
-      return res.status(403).json({ message: `Account locked. Try again after ${new Date(user.locked_until).toLocaleString()}` });
+      return res.status(403).json({
+        message: `Account locked. Try again after ${new Date(user.locked_until).toLocaleString()}`
+      });
     }
-    if (user.status !== 1) return res.status(403).json({ message: "Account not activated. Check your email." });
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       let newAttempts = user.failed_attempts + 1;
       let lockUntil = null;
       if (newAttempts >= 3) {
-        lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+        lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
         newAttempts = 0;
       }
       await pool.query("UPDATE users SET failed_attempts = ?, locked_until = ? WHERE id = ?", [newAttempts, lockUntil, user.id]);
@@ -105,13 +78,13 @@ router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "Email required" });
   try {
-    const [rows] = await pool.query("SELECT id FROM users WHERE email = ? AND status = 1", [email]);
-    const resetToken = generateToken();
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    const [rows] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
+    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
     if (rows.length > 0) {
       await pool.query("UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?", [resetToken, expiresAt, rows[0].id]);
     }
-    console.log(`[DEV] Reset: http://localhost:5173/reset-password?token=${resetToken}`);
+    console.log(`[DEV] Reset link: http://localhost:5173/reset-password?token=${resetToken}`);
     res.json({ message: "If an account exists, a reset link has been sent." });
   } catch (err) {
     console.error("Forgot Password Error:", err);

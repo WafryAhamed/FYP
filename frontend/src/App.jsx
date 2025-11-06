@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import './styles.css';
 import Navbar from './components/Navbar.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import Login from './components/Login.jsx';
@@ -40,9 +39,13 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-    setUser(null);
+    if (window.confirm('Are you sure you want to log out?')) {
+      localStorage.removeItem('token');
+      setIsAuthenticated(false);
+      setUser(null);
+      window.location.href = '/';
+      alert('You have been logged out.');
+    }
   };
 
   return (
@@ -56,7 +59,6 @@ function App() {
           <Route path="/dashboard" element={isAuthenticated ? <Dashboard user={user} /> : <Navigate to="/login" replace />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          {/* Activation route is handled by backend GET /api/auth/activate */}
         </Routes>
       </div>
     </Router>
