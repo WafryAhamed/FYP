@@ -7,7 +7,7 @@ export default function verifyToken(req, res, next) {
   const authHeader = req.headers["authorization"] || req.headers["Authorization"];
   if (!authHeader) return res.status(401).json({ message: "No token provided" });
 
-  // expected "Bearer <token>"
+
   const parts = authHeader.split(" ");
   const token = parts.length === 2 ? parts[1] : parts[0];
 

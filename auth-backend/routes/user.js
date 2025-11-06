@@ -5,7 +5,7 @@ import verifyToken from "../middleware/auth.js";
 
 const router = express.Router();
 
-// GET /api/user/profile
+// GET /api/user/
 router.get("/profile", verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;

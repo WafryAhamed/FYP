@@ -136,7 +136,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Reset failed attempts on success
+    // Reset failed 
     await pool.query("UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ?", [user.id]);
 
     // Generate JWT with role

@@ -10,7 +10,7 @@ import userRoutes from "./routes/user.js";
 dotenv.config();
 const app = express();
 
-// allow frontend (Vite) dev server origin
+//
 app.use(cors({ origin: ["http://localhost:5173", "http://127.0.0.1:5173"] }));
 app.use(bodyParser.json());
 
