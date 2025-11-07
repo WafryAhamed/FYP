@@ -20,17 +20,17 @@ const Onboarding = () => {
             <path d="M2 17L12 22L22 17" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M2 12L12 17L22 12" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <h1>Edu Platform</h1>
+          <h1>AdaptiveLearn</h1>
         </div>
 
-        <p className="subtitle">Personalized Learning. AI-Powered. Real-Time Feedback.</p>
+        <p className="subtitle">AI-Driven Learning That Adapts to Every Student</p>
         <p className="description">
-          Transform your learning experience with interactive content, adaptive quizzes, and intelligent insights for students and instructors alike.
+          Empower educators and engage learners with real-time analytics, predictive insights, and personalized content — all within your existing virtual classroom.
         </p>
 
         <div className="button-group">
-          <button className="btn-primary" onClick={() => navigate("/register")}>Sign Up</button>
-          <button className="btn-secondary" onClick={() => navigate("/login")}>Login</button>
+          <button className="btn-primary" onClick={() => navigate("/register")}>Get Started Free</button>
+          <button className="btn-secondary" onClick={() => navigate("/login")}>Sign In</button>
         </div>
       </div>
     </section>
