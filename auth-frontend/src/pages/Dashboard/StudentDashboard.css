@@ -1,0 +1,17 @@
+.dashboard {
+  padding: 40px;
+  text-align: center;
+  background-color: var(--bg-light);
+  min-height: calc(100vh - 60px);
+}
+
+.dashboard h1 {
+  color: var(--primary-dark);
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.dashboard p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+}

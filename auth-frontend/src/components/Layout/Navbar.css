@@ -1,0 +1,26 @@
+.navbar {
+  background-color: var(--primary-dark);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 30px;
+  font-weight: 600;
+}
+
+.navbar span {
+  font-size: 1.1rem;
+}
+
+.navbar button {
+  background-color: var(--accent);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  transition: 0.3s;
+}
+
+.navbar button:hover {
+  background-color: var(--primary);
+}

@@ -1,0 +1,27 @@
+.onboarding {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.onboarding h1 {
+  font-size: 2.5rem;
+  color: var(--primary-dark);
+  margin-bottom: 25px;
+}
+
+.onboarding button {
+  margin: 10px;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.onboarding button:nth-child(2) {
+  background-color: var(--accent);
+}
+
+.onboarding button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px var(--shadow);
+}

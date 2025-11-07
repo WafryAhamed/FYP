@@ -1,0 +1,22 @@
+.register-container {
+  composes: container;
+}
+
+.register-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+.register-container form input,
+.register-container form select {
+  margin-bottom: 12px;
+}
+
+.register-container form button {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.register-container select {
+  background-color: var(--bg-light);
+}

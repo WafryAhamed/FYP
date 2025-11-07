@@ -1,0 +1,32 @@
+.login-container {
+  composes: container;
+}
+
+.login-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+.login-container form input {
+  margin-bottom: 14px;
+}
+
+.login-container form button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.login-footer p {
+  color: var(--primary);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.login-footer p:hover {
+  text-decoration: underline;
+}
