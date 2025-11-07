@@ -1,39 +1,40 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../api';
+// src/components/Login.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api";
 import './Login.css';
 
-const Login = () => {
+const Login = ({ setUser }) => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [message, setMessage] = useState('');
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setFormData({...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await loginUser(form);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.role);
-      navigate('/dashboard');
+      const res = await loginUser(formData);
+      localStorage.setItem("token", res.data.token);
+      setUser(res.data.user);
+      navigate("/dashboard");
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
     <div className="auth-container">
       <h2>Login</h2>
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-        <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required />
+      {error && <div className="error">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
+        <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
         <button type="submit">Login</button>
-        {message && <p className="message">{message}</p>}
-        <p>
-          <a href="/forgot-password">Forgot Password?</a>
-        </p>
       </form>
+      <p>
+        <a href="/forgot-password">Forgot Password?</a>
+      </p>
     </div>
   );
 };

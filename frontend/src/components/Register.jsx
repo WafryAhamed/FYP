@@ -1,58 +1,58 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../api';
+// src/components/Register.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../api";
 import './Register.css';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    roll: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    passwordHint: '',
-    role: 'student'
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    roll: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    passwordHint: "",
+    role: "student",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setFormData({...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
+    if(formData.password !== formData.confirmPassword){
+      setError("Passwords do not match");
       return;
     }
     try {
-      await registerUser(form);
-      alert('Registration successful! Please login.');
-      navigate('/login');
+      await registerUser(formData);
+      alert("Registration successful!");
+      navigate("/login");
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || "Registration failed");
     }
   };
 
   return (
-    <div className="form-container">
+    <div className="auth-container">
       <h2>Register</h2>
+      {error && <div className="error">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} required />
-        <input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} required />
-        <input name="roll" placeholder="Roll / ID" value={form.roll} onChange={handleChange} required />
-        <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-        <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required />
-        <input type="password" name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} required />
-        <input name="passwordHint" placeholder="Password Hint" value={form.passwordHint} onChange={handleChange} />
-        <select name="role" value={form.role} onChange={handleChange}>
+        <input name="firstName" placeholder="First Name" onChange={handleChange} required />
+        <input name="lastName" placeholder="Last Name" onChange={handleChange} required />
+        <input name="roll" placeholder="Roll" onChange={handleChange} required />
+        <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
+        <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
+        <input name="confirmPassword" type="password" placeholder="Confirm Password" onChange={handleChange} required />
+        <input name="passwordHint" placeholder="Password Hint" onChange={handleChange} required />
+        <select name="role" onChange={handleChange} value={formData.role}>
           <option value="student">Student</option>
           <option value="instructor">Instructor</option>
           <option value="admin">Admin</option>
         </select>
-        {error && <div className="error">{error}</div>}
-        <button type="submit" className="btn btn-primary">Register</button>
+        <button type="submit">Register</button>
       </form>
     </div>
   );
