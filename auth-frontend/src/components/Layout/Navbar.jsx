@@ -8,8 +8,8 @@ const Navbar = () => {
   if (!user) return null;
 
   return (
-    <nav style={{ padding: "10px", background: "#f0f0f0", display: "flex", justifyContent: "space-between" }}>
-      <span>Edu Platform ({user.role})</span>
+     <nav className="navbar">
+    <span>Edu Platform ({user.role})</span>
       <button onClick={logoutUser}>Logout</button>
     </nav>
   );

@@ -1,26 +1,72 @@
+:root {
+  --primary-dark: #4f46e5;
+  --primary-hover: #4338ca;
+  --text-light: #f9fafb;
+  --text-dark: #1f2937;
+  --bg-blur: rgba(255, 255, 255, 0.75);
+  --border-color: rgba(79, 70, 229, 0.15);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ====== Navbar Container ====== */
 .navbar {
-  background-color: var(--primary-dark);
-  color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 30px;
-  font-weight: 600;
+  background: var(--bg-blur);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  padding: 14px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background 0.3s ease;
 }
 
+/* ====== Logo / Title ====== */
 .navbar span {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  letter-spacing: 0.5px;
+  user-select: none;
 }
 
+/* ====== Logout Button ====== */
 .navbar button {
-  background-color: var(--accent);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
+  background: var(--primary-dark);
+  color: #fff;
   border: none;
-  transition: 0.3s;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
 }
 
 .navbar button:hover {
-  background-color: var(--primary);
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+}
+
+/* ====== Mobile View ====== */
+@media (max-width: 480px) {
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 16px;
+  }
+
+  .navbar span {
+    font-size: 1rem;
+  }
+
+  .navbar button {
+    width: 100%;
+  }
 }
