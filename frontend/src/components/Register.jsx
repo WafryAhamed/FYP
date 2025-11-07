@@ -8,48 +8,51 @@ const Register = () => {
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
-    roll: 'student',
+    roll: '',
     email: '',
     password: '',
     confirmPassword: '',
     passwordHint: '',
+    role: 'student'
   });
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-      setMessage('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
     try {
-      const res = await registerUser(form);
-      setMessage(res.data.message);
-      setTimeout(() => navigate('/login'), 1200);
+      await registerUser(form);
+      alert('Registration successful! Please login.');
+      navigate('/login');
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Registration failed');
+      console.error(err);
+      setError(err.response?.data?.message || 'Registration failed');
     }
   };
 
   return (
-    <div className="auth-container">
-      <h2>Sign Up</h2>
-      <form className="auth-form" onSubmit={handleSubmit}>
+    <div className="form-container">
+      <h2>Register</h2>
+      <form onSubmit={handleSubmit}>
         <input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} required />
         <input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} required />
-        <select name="roll" value={form.roll} onChange={handleChange}>
-          <option value="student">Student</option>
-          <option value="instructor">Instructor</option>
-          <option value="admin">Admin</option>
-        </select>
+        <input name="roll" placeholder="Roll / ID" value={form.roll} onChange={handleChange} required />
         <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
         <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required />
         <input type="password" name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} required />
         <input name="passwordHint" placeholder="Password Hint" value={form.passwordHint} onChange={handleChange} />
-        <button type="submit">Register</button>
-        {message && <p className="message">{message}</p>}
+        <select name="role" value={form.role} onChange={handleChange}>
+          <option value="student">Student</option>
+          <option value="instructor">Instructor</option>
+          <option value="admin">Admin</option>
+        </select>
+        {error && <div className="error">{error}</div>}
+        <button type="submit" className="btn btn-primary">Register</button>
       </form>
     </div>
   );

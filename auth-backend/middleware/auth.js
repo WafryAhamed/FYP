@@ -1,27 +1,26 @@
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+// backend/middleware/auth.js
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const authMiddleware = (roles = []) => {
-  return (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) return res.status(401).json({ message: 'Access denied. No token provided.' });
+export const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
-    const token = authHeader.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Access denied. Invalid token format.' });
+  if (!token) return res.status(401).json({ message: 'Unauthorized: No token provided' });
 
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
-
-      if (roles.length && !roles.includes(decoded.role)) {
-        return res.status(403).json({ message: 'Forbidden: insufficient permissions' });
-      }
-
-      next();
-    } catch (err) {
-      return res.status(400).json({ message: 'Invalid token' });
-    }
-  };
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: 'Forbidden: Invalid token' });
+    req.user = user;
+    next();
+  });
 };
 
-module.exports = authMiddleware;
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Forbidden: Insufficient role' });
+    }
+    next();
+  };
+};

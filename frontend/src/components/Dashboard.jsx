@@ -1,50 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { getProfile, logoutUser } from '../api';
-import { useNavigate } from 'react-router-dom';
-import './Dashboard.css';
+import API from '../api';
+import Navbar from './Navbar';
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const token = localStorage.getItem('token');
+const Dashboard = ({ user, setUser }) => {
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await getProfile(token);
-        setUser(res.data);
+        const res = await API.get('/user/profile');
+        setProfile(res.data);
       } catch (err) {
         console.error(err);
-        navigate('/login');
       }
     };
     fetchProfile();
-  }, [token, navigate]);
+  }, []);
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser(token);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
-      alert('You have been logged out');
-      navigate('/');
-    }
-  };
+  if (!user) return <p>Loading...</p>;
 
   return (
-    <div className="auth-container">
-      <h2>Dashboard</h2>
-      {user && (
-        <div>
-          <p><strong>Name:</strong> {user.first_name} {user.last_name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Role:</strong> {user.roll}</p>
-        </div>
-      )}
-      <button onClick={handleLogout}>Logout</button>
+    <div>
+      <Navbar user={user} setUser={setUser} />
+      <div style={{ padding: '2rem' }}>
+        <h2>Welcome, {user.firstName}</h2>
+        <p>Role: {user.roll}</p>
+        {profile && (
+          <div>
+            <p>Email: {profile.email}</p>
+            <p>Registered At: {new Date(profile.created_at).toLocaleString()}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

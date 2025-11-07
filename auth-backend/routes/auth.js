@@ -1,25 +1,22 @@
-const express = require('express');
+// backend/routes/auth.js
+import express from 'express';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { pool } from '../db.js';
+
+dotenv.config();
 const router = express.Router();
-const pool = require('../db');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const authMiddleware = require('../middleware/auth');
-require('dotenv').config();
 
-// Helper: Check if account is locked
-const isLocked = (user) => {
-  if (!user.locked_until) return false;
-  return new Date(user.locked_until) > new Date();
-};
+const MAX_ATTEMPTS = 3;
+const LOCK_TIME = 15 * 60 * 1000; // 15 min
 
-// Registration
+// Register
 router.post('/register', async (req, res) => {
   const { firstName, lastName, roll, email, password, confirmPassword, passwordHint } = req.body;
-
-  if (!firstName || !lastName || !email || !password || !confirmPassword) {
-    return res.status(400).json({ message: 'All required fields must be filled' });
+  if (!firstName || !lastName || !email || !password || !confirmPassword || !roll) {
+    return res.status(400).json({ message: 'Please fill all required fields' });
   }
-
   if (password !== confirmPassword) {
     return res.status(400).json({ message: 'Passwords do not match' });
   }
@@ -29,13 +26,11 @@ router.post('/register', async (req, res) => {
     if (existing.length > 0) return res.status(400).json({ message: 'Email already registered' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     await pool.query(
       'INSERT INTO users (first_name, last_name, roll, email, password, password_hint) VALUES (?, ?, ?, ?, ?, ?)',
-      [firstName, lastName, roll || 'student', email, hashedPassword, passwordHint || null]
+      [firstName, lastName, roll, email, hashedPassword, passwordHint || null]
     );
-
-    res.status(201).json({ message: 'Registration successful' });
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -45,64 +40,56 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (rows.length === 0) return res.status(400).json({ message: 'Invalid credentials' });
-
     const user = rows[0];
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    if (isLocked(user)) {
-      return res.status(403).json({ message: 'Account locked. Try again later.' });
+    if (user.locked_until && new Date() < new Date(user.locked_until)) {
+      return res.status(403).json({ message: `Account locked. Try again later.` });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      let failedAttempts = user.failed_attempts + 1;
-      let locked_until = null;
-
-      if (failedAttempts >= 3) {
-        locked_until = new Date(Date.now() + 15 * 60 * 1000); // lock 15 minutes
-        failedAttempts = 0; // reset attempts after lock
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      const failedAttempts = user.failed_attempts + 1;
+      let lockedUntil = null;
+      if (failedAttempts >= MAX_ATTEMPTS) {
+        lockedUntil = new Date(Date.now() + LOCK_TIME);
       }
-
-      await pool.query('UPDATE users SET failed_attempts = ?, locked_until = ? WHERE id = ?', [
+      await pool.query('UPDATE users SET failed_attempts=?, locked_until=? WHERE id=?', [
         failedAttempts,
-        locked_until,
-        user.id,
+        lockedUntil,
+        user.id
       ]);
-
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     // Reset failed attempts
-    await pool.query('UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ?', [user.id]);
+    await pool.query('UPDATE users SET failed_attempts=0, locked_until=NULL WHERE id=?', [user.id]);
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.roll }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.roll },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
 
-    res.json({ message: 'Login successful', token, role: user.roll });
+    res.json({ token, role: user.roll, firstName: user.first_name });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Logout (client should delete token)
-router.post('/logout', authMiddleware(), (req, res) => {
-  res.json({ message: 'You have been logged out' });
-});
-
 // Forgot Password
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   try {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (rows.length === 0) return res.status(400).json({ message: 'Email not registered' });
-
+    const [rows] = await pool.query('SELECT * FROM users WHERE email=?', [email]);
     const user = rows[0];
-    res.json({ message: 'Use this hint to remember your password', passwordHint: user.password_hint });
+    if (!user) return res.status(400).json({ message: 'Email not found' });
+
+    // For simplicity, return password hint
+    res.json({ passwordHint: user.password_hint || 'No hint set' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -111,22 +98,17 @@ router.post('/forgot-password', async (req, res) => {
 
 // Reset Password
 router.post('/reset-password', async (req, res) => {
-  const { email, newPassword, confirmNewPassword } = req.body;
-
-  if (newPassword !== confirmNewPassword) return res.status(400).json({ message: 'Passwords do not match' });
+  const { email, newPassword, confirmPassword } = req.body;
+  if (newPassword !== confirmPassword) return res.status(400).json({ message: 'Passwords do not match' });
 
   try {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (rows.length === 0) return res.status(400).json({ message: 'Email not found' });
-
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE users SET password = ? WHERE email = ?', [hashedPassword, email]);
-
-    res.json({ message: 'Password reset successful' });
+    await pool.query('UPDATE users SET password=? WHERE email=?', [hashedPassword, email]);
+    res.json({ message: 'Password reset successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-module.exports = router;
+export default router;

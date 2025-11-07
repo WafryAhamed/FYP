@@ -1,36 +1,42 @@
 import React, { useState } from 'react';
 import { resetPassword } from '../api';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import './ResetPassword.css';
 
 const ResetPassword = () => {
-  const [form, setForm] = useState({ email: '', newPassword: '', confirmNewPassword: '' });
-  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+
+  const [form, setForm] = useState({ password: '', confirmPassword: '' });
+  const [error, setError] = useState('');
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.newPassword !== form.confirmNewPassword) {
-      setMessage('Passwords do not match');
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
     try {
-      const res = await resetPassword(form);
-      setMessage(res.data.message);
+      await resetPassword({ token, password: form.password });
+      alert('Password reset successfully');
+      navigate('/login');
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Reset failed');
+      console.error(err);
+      setError(err.response?.data?.message || 'Reset failed');
     }
   };
 
   return (
-    <div className="auth-container">
+    <div className="form-container">
       <h2>Reset Password</h2>
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-        <input type="password" name="newPassword" placeholder="New Password" value={form.newPassword} onChange={handleChange} required />
-        <input type="password" name="confirmNewPassword" placeholder="Confirm New Password" value={form.confirmNewPassword} onChange={handleChange} required />
-        <button type="submit">Reset</button>
-        {message && <p className="message">{message}</p>}
+      <form onSubmit={handleSubmit}>
+        <input type="password" name="password" placeholder="New Password" value={form.password} onChange={handleChange} required />
+        <input type="password" name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} required />
+        {error && <div className="error">{error}</div>}
+        <button type="submit" className="btn btn-primary">Reset Password</button>
       </form>
     </div>
   );

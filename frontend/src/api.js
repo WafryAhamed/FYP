@@ -1,15 +1,12 @@
 import axios from 'axios';
 
-const API = axios.create({
-  baseURL: 'http://localhost:5000/api', // adjust if your backend is on another port
-  withCredentials: true, // send cookies automatically
-});
+const API_URL = 'http://localhost:5000/api';
 
-export const registerUser = (data) => API.post('/auth/register', data);
-export const loginUser = (data) => API.post('/auth/login', data);
-export const logoutUser = () => API.post('/auth/logout');
-export const forgotPassword = (data) => API.post('/auth/forgot-password', data);
-export const resetPassword = (data) => API.post('/auth/reset-password', data);
-export const getProfile = () => API.get('/user/profile');
-
-export default API;
+export const registerUser = (data) => axios.post(`${API_URL}/auth/register`, data);
+export const loginUser = (data) => axios.post(`${API_URL}/auth/login`, data);
+export const forgotPassword = (data) => axios.post(`${API_URL}/auth/forgot-password`, data);
+export const resetPassword = (data) => axios.post(`${API_URL}/auth/reset-password`, data);
+export const getProfile = (token) =>
+  axios.get(`${API_URL}/user/profile`, { headers: { Authorization: `Bearer ${token}` } });
+export const logoutUser = (token) =>
+  axios.post(`${API_URL}/auth/logout`, {}, { headers: { Authorization: `Bearer ${token}` } });
