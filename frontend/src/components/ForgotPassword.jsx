@@ -10,7 +10,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     try {
       const res = await forgotPassword({ email });
-      setMessage(`Hint: ${res.data.passwordHint}`);
+      setMessage(`Password hint: ${res.data.passwordHint}`);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Error');
     }
@@ -19,7 +19,7 @@ const ForgotPassword = () => {
   return (
     <div className="auth-container">
       <h2>Forgot Password</h2>
-      <form onSubmit={handleSubmit} className="auth-form">
+      <form className="auth-form" onSubmit={handleSubmit}>
         <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <button type="submit">Get Hint</button>
         {message && <p className="message">{message}</p>}

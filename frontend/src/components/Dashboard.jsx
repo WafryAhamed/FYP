@@ -1,69 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getProfile, logoutUser } from '../api';
 import { useNavigate } from 'react-router-dom';
-import "../styles.css"; // ✅ Fixed
+import './Dashboard.css';
 
-const Dashboard = ({ user }) => {
+const Dashboard = () => {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      title: "Introduction to Web Development",
-      description: "Learn HTML, CSS, and JavaScript fundamentals to build your first website.",
-      instructor: "Sarah Johnson",
-      duration: "6 weeks",
-      level: "Beginner"
-    },
-    {
-      id: 2,
-      title: "Advanced React Patterns",
-      description: "Master advanced React concepts including hooks, context, and state management.",
-      instructor: "Michael Chen",
-      duration: "8 weeks",
-      level: "Intermediate"
-    },
-    {
-      id: 3,
-      title: "Database Design & SQL",
-      description: "Learn how to design efficient databases and write complex SQL queries.",
-      instructor: "Alex Rivera",
-      duration: "5 weeks",
-      level: "Intermediate"
-    },
-    {
-      id: 4,
-      title: "Node.js & Express Backend",
-      description: "Build scalable server-side applications using Node.js and Express framework.",
-      instructor: "Priya Patel",
-      duration: "7 weeks",
-      level: "Intermediate"
-    }
-  ]);
+  const [user, setUser] = useState(null);
+  const token = localStorage.getItem('token');
 
-  const handleCourseClick = (courseId) => {
-    alert(`You selected course #${courseId}. Enroll feature coming soon!`);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getProfile(token);
+        setUser(res.data);
+      } catch (err) {
+        console.error(err);
+        navigate('/login');
+      }
+    };
+    fetchProfile();
+  }, [token, navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser(token);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      alert('You have been logged out');
+      navigate('/');
+    }
   };
 
   return (
-    <div className="container">
-      <div className="card">
-        <h2 className="card-header">Welcome, {user?.name || 'User'}!</h2>
-        <p>Here are some recommended courses to start your learning journey.</p>
-      </div>
-
-      <div className="dashboard-grid">
-        {courses.map(course => (
-          <div key={course.id} className="course-card" onClick={() => handleCourseClick(course.id)}>
-            <div className="course-card-body">
-              <h3 className="course-card-title">{course.title}</h3>
-              <p className="course-card-desc">{course.description}</p>
-              <div className="course-card-footer">
-                <span>By {course.instructor}</span>
-                <span>{course.duration} • {course.level}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="auth-container">
+      <h2>Dashboard</h2>
+      {user && (
+        <div>
+          <p><strong>Name:</strong> {user.first_name} {user.last_name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Role:</strong> {user.roll}</p>
+        </div>
+      )}
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 };

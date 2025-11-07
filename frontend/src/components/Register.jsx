@@ -20,10 +20,14 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      setMessage('Passwords do not match');
+      return;
+    }
     try {
       const res = await registerUser(form);
       setMessage(res.data.message);
-      setTimeout(() => navigate('/login'), 1000);
+      setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Registration failed');
     }
@@ -32,7 +36,7 @@ const Register = () => {
   return (
     <div className="auth-container">
       <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit} className="auth-form">
+      <form className="auth-form" onSubmit={handleSubmit}>
         <input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} required />
         <input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} required />
         <select name="roll" value={form.roll} onChange={handleChange}>

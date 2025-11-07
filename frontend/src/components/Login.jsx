@@ -25,7 +25,7 @@ const Login = () => {
   return (
     <div className="auth-container">
       <h2>Login</h2>
-      <form onSubmit={handleSubmit} className="auth-form">
+      <form className="auth-form" onSubmit={handleSubmit}>
         <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
         <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required />
         <button type="submit">Login</button>
