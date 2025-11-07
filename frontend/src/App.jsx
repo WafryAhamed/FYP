@@ -1,7 +1,5 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
 import Navbar from './components/Navbar.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import Login from './components/Login.jsx';
@@ -22,45 +20,45 @@ function App() {
 
   const checkAuth = async () => {
     try {
-      const response = await authApi.get('/user/profile');
-      setUser(response.data);
+      const res = await authApi.getProfile();
+      setUser(res.data);
       setIsAuthenticated(true);
     } catch {
-      localStorage.removeItem('token');
-      setIsAuthenticated(false);
-      setUser(null);
+      logout();
     }
   };
 
-  const handleLoginSuccess = (userData) => {
-    localStorage.setItem('token', userData.token);
-    setUser(userData.user);
+  const handleLoginSuccess = (data) => {
+    localStorage.setItem('token', data.token);
+    setUser(data.user);
     setIsAuthenticated(true);
   };
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    setUser(null);
+  };
+
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to log out?')) {
-      localStorage.removeItem('token');
-      setIsAuthenticated(false);
-      setUser(null);
-      window.location.href = '/';
+    if (confirm('Are you sure you want to log out?')) {
+      logout();
       alert('You have been logged out.');
+      window.location.href = '/';
     }
   };
 
   return (
     <Router>
-      <div className="App">
-        {isAuthenticated && <Navbar user={user} onLogout={handleLogout} />}
-        <Routes>
-          <Route path="/" element={!isAuthenticated ? <Onboarding /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={!isAuthenticated ? <Login onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={isAuthenticated ? <Dashboard user={user} /> : <Navigate to="/login" replace />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-        </Routes>
-      </div>
+      {isAuthenticated && <Navbar user={user} onLogout={handleLogout} />}
+      <Routes>
+        <Route path="/" element={!isAuthenticated ? <Onboarding /> : <Navigate to="/dashboard" />} />
+        <Route path="/login" element={!isAuthenticated ? <Login onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/dashboard" />} />
+        <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" />} />
+        <Route path="/dashboard" element={isAuthenticated ? <Dashboard user={user} /> : <Navigate to="/login" />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+      </Routes>
     </Router>
   );
 }

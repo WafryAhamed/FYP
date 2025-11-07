@@ -1,20 +1,24 @@
-// middleware/auth.js
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-dotenv.config();
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-export default function verifyToken(req, res, next) {
-  const authHeader = req.headers["authorization"] || req.headers["Authorization"];
-  if (!authHeader) return res.status(401).json({ message: "No token provided" });
+const authMiddleware = (roles = []) => {
+  return (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
 
-  const parts = authHeader.split(" ");
-  const token = parts.length === 2 ? parts[1] : parts[0];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
 
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = payload; // { id, email, role }
-    next();
-  } catch (err) {
-    return res.status(401).json({ message: "Invalid or expired token" });
-  }
-}
+      if (roles.length && !roles.includes(decoded.role)) {
+        return res.status(403).json({ message: 'Forbidden: insufficient permissions' });
+      }
+
+      next();
+    } catch (err) {
+      return res.status(400).json({ message: 'Invalid token' });
+    }
+  };
+};
+
+module.exports = authMiddleware;
