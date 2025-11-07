@@ -1,17 +1,86 @@
-.dashboard {
-  padding: 40px;
-  text-align: center;
-  background-color: var(--bg-light);
-  min-height: calc(100vh - 60px);
+:root {
+  --primary-dark: #4f46e5;
+  --primary-hover: #4338ca;
+  --accent: #0ea5ff;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --text-light: #f9fafb;
+  --text-muted: #cbd5e1;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.dashboard h1 {
-  color: var(--primary-dark);
-  font-size: 2rem;
-  margin-bottom: 15px;
-}
-
-.dashboard p {
+/* ====== Dashboard Container ====== */
+div {
+  min-height: 100vh;
+  background: var(--bg-gradient);
   color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  animation: fadeIn 1s ease forwards;
+}
+
+/* ====== Headings ====== */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 16px;
+  text-shadow: 0 3px 10px rgba(14, 165, 255, 0.3);
+}
+
+p {
   font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* ====== Optional Glass Card Wrapper ====== */
+.student-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 30px 40px;
+  box-shadow: var(--shadow);
+  margin-top: 30px;
+  width: 90%;
+  max-width: 700px;
+  transition: transform 0.3s ease;
+}
+
+.student-card:hover {
+  transform: translateY(-5px);
+}
+
+/* ====== Animation ====== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  .student-card {
+    padding: 20px;
+  }
 }
