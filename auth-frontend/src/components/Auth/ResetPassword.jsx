@@ -23,7 +23,8 @@ const ResetPassword = () => {
   };
 
   return (
-    <div style={{ width: "400px", margin: "50px auto" }}>
+    <div className="reset-container">
+
       <h2>Reset Password</h2>
       <form onSubmit={handleSubmit}>
         <input type="password" placeholder="New Password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />

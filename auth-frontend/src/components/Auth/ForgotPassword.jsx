@@ -26,7 +26,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div style={{ width: "400px", margin: "50px auto" }}>
+<div className="forgot-container">
       <h2>Forgot Password</h2>
       {!hint && <>
         <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
