@@ -1,21 +1,12 @@
-import axios from "axios";
+import axios from 'axios';
 
-const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-});
+const API_URL = 'http://localhost:5000/api';
 
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-export const authApi = {
-  register: (data) => api.post("/auth/register", data),
-  login: (data) => api.post("/auth/login", data),
-  forgotPassword: (data) => api.post("/auth/forgot-password", data),
-  resetPassword: (data) => api.post("/auth/reset-password", data),
-  getProfile: () => api.get("/user/profile")
-};
-
-export default api;
+export const registerUser = (data) => axios.post(`${API_URL}/auth/register`, data);
+export const loginUser = (data) => axios.post(`${API_URL}/auth/login`, data);
+export const logoutUser = (token) =>
+  axios.post(`${API_URL}/auth/logout`, {}, { headers: { Authorization: `Bearer ${token}` } });
+export const forgotPassword = (data) => axios.post(`${API_URL}/auth/forgot-password`, data);
+export const resetPassword = (data) => axios.post(`${API_URL}/auth/reset-password`, data);
+export const getProfile = (token) =>
+  axios.get(`${API_URL}/user/profile`, { headers: { Authorization: `Bearer ${token}` } });

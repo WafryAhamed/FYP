@@ -1,54 +1,39 @@
-// src/components/Login.jsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { authApi } from '../api.js';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../api';
 import './Login.css';
 
-const Login = ({ onLoginSuccess }) => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+const Login = () => {
   const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [message, setMessage] = useState('');
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setLoading(true);
     try {
-      const response = await authApi.post('/auth/login', formData);
-      onLoginSuccess(response.data);
-      const role = response.data.user.role;
-      if (role === 'admin') navigate('/dashboard/admin');
-      else if (role === 'instructor') navigate('/dashboard/instructor');
-      else navigate('/dashboard/student');
+      const res = await loginUser(form);
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('role', res.data.role);
+      navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed.');
-    } finally {
-      setLoading(false);
+      setMessage(err.response?.data?.message || 'Login failed');
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2>Sign In</h2>
-        {error && <div className="alert error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <input name="email" type="email" value={formData.email} onChange={handleChange}
-            placeholder="Email" required />
-          <input name="password" type="password" value={formData.password} onChange={handleChange}
-            placeholder="Password" required />
-          <button type="submit" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-        <button className="forgot-btn" onClick={() => navigate('/forgot-password')}>
-          Forgot Password?
-        </button>
-        <p className="switch-link">
-          Don't have an account? <Link to="/register">Create one</Link>
+    <div className="auth-container">
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+        <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required />
+        <button type="submit">Login</button>
+        {message && <p className="message">{message}</p>}
+        <p>
+          <a href="/forgot-password">Forgot Password?</a>
         </p>
-      </div>
+      </form>
     </div>
   );
 };
