@@ -21,7 +21,8 @@ const Register = () => {
   };
 
   return (
-    <div style={{ width: "400px", margin: "50px auto" }}>
+    <div className="register-container">
+
       <h2>Sign Up</h2>
       <form onSubmit={handleSubmit}>
         <input name="firstName" placeholder="First Name" onChange={handleChange} required />

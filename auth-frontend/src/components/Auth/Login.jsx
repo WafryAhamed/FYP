@@ -3,6 +3,7 @@ import { login } from "../../api/auth";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import './Login.css';
+
 const Login = () => {
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext);
@@ -24,7 +25,7 @@ const Login = () => {
   };
 
   return (
-    <div style={{ width: "400px", margin: "50px auto" }}>
+    <div className="login-container" style={{ width: "400px", margin: "50px auto" }}>
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <input name="email" placeholder="Email" onChange={handleChange} required />

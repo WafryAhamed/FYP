@@ -1,32 +1,118 @@
-.login-container {
-  composes: container;
+:root {
+  --primary-dark: #4f46e5;
+  --bg-light: #f9fafb;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --border-color: rgba(79, 70, 229, 0.2);
 }
 
+/* ====== Container ====== */
+.login-container {
+  position: relative;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 420px;
+  margin: 6rem auto;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  animation: fadeIn 0.6s ease;
+}
+
+/* Heading */
 .login-container h2 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 1.5rem;
+}
+
+/* ====== Form ====== */
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .login-container form input {
-  margin-bottom: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-color);
+  background: #fff;
+  font-size: 1rem;
+  color: var(--text-dark);
+  transition: all 0.25s ease;
 }
 
+.login-container form input:focus {
+  border-color: var(--primary-dark);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  outline: none;
+}
+
+/* Button */
 .login-container form button {
-  width: 100%;
+  background: var(--primary-dark);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
   margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
+.login-container form button:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+/* ====== Footer ====== */
 .login-footer {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 18px;
 }
 
 .login-footer p {
-  color: var(--primary);
+  color: var(--primary-dark);
+  font-weight: 500;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.3s;
 }
 
 .login-footer p:hover {
   text-decoration: underline;
+}
+
+/* ====== Fade-in Animation ====== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 2rem 1.5rem;
+    margin: 4rem 1rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.7rem;
+  }
 }
